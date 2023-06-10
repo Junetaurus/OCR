@@ -11,10 +11,9 @@
 
 @interface OCRFaceView ()
 
-@property (nonatomic, strong) UIView *bgView;
-@property (nonatomic, strong) UIImageView *faceView;
+@property (nonatomic, strong) UIView *faceView;
+@property (nonatomic, strong) UIImageView *limitView;
 @property (nonatomic, strong) OCRDevice *device;
-
 
 @end
 
@@ -27,6 +26,7 @@
         
         [self addSubview:self.faceView];
         [self.device startRunning];
+        [self addSubview:self.limitView];
     }
     return self;
 }
@@ -34,17 +34,27 @@
 - (void)layoutSubviews {
     [super layoutSubviews];
     
-    [_faceView sizeToFit];
-    _faceView.center = self.center;
-    [_device updateFrame:_faceView.frame];
+    [_limitView sizeToFit];
+    _limitView.center = self.center;
+    //
+    _faceView.frame = _limitView.frame;
+    //
+    [_device updateFrame];
 }
 
 #pragma mark - getter
-- (UIImageView *)faceView {
+- (UIView *)faceView {
     if (!_faceView) {
-        _faceView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ocr_face_frame"]];
+        _faceView = [[UIView alloc] init];
     }
     return _faceView;
+}
+
+- (UIImageView *)limitView {
+    if (!_limitView) {
+        _limitView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ocr_face_frame"]];
+    }
+    return _limitView;
 }
 
 - (OCRDevice *)device {
@@ -55,3 +65,4 @@
 }
 
 @end
+

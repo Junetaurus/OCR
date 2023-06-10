@@ -22,6 +22,7 @@
 @property (nonatomic ,strong) AVCaptureVideoPreviewLayer *previewLayer;
 //
 @property (nonatomic, assign) OCRDeviceType type;
+@property (nonatomic, weak) UIView *view;
 
 @end
 
@@ -31,6 +32,7 @@
     self = [super init];
     if (self) {
         if ([self authorizationStatus]) {
+            _view = view;
             _type = type;
             //
             if ([self.session canAddInput:self.input]) {
@@ -46,8 +48,8 @@
     return self;
 }
 
-- (void)updateFrame:(CGRect)frame {
-    self.previewLayer.frame = CGRectMake(0, 0, frame.size.width, frame.size.height);
+- (void)updateFrame {
+    self.previewLayer.frame = _view.bounds;
 }
 
 - (void)startRunning {
@@ -113,3 +115,4 @@
 }
 
 @end
+

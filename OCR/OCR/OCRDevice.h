@@ -20,10 +20,11 @@ typedef NS_ENUM(NSInteger, OCRDeviceType) {
 
 - (instancetype)initWithView:(UIView *)view deviceType:(OCRDeviceType)type;
 
-- (void)updateFrame:(CGRect)frame;
+- (void)updateFrame;
 
 - (void)startRunning;
 
 @end
 
 NS_ASSUME_NONNULL_END
+
