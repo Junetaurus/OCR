@@ -8,7 +8,7 @@
 #import "OCRDevice.h"
 #import <AVFoundation/AVFoundation.h>
 
-@interface OCRDevice ()
+@interface OCRDevice () <AVCapturePhotoCaptureDelegate>
 
 //设备
 @property (nonatomic, strong) AVCaptureDevice *device;
@@ -23,6 +23,7 @@
 //
 @property (nonatomic, assign) OCRDeviceType type;
 @property (nonatomic, weak) UIView *view;
+@property (nonatomic, copy) photoBlock block;
 
 @end
 
@@ -56,6 +57,15 @@
     [self.session startRunning];
 }
 
+- (void)stopRunning {
+    [self.session stopRunning];
+}
+
+- (void)getPhoto:(photoBlock)block {
+    AVCapturePhotoSettings *settings = [AVCapturePhotoSettings photoSettings];
+    [_output capturePhotoWithSettings:settings delegate:self];
+}
+
 #pragma mark - 权限
 - (BOOL)authorizationStatus {
     AVAuthorizationStatus authStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
@@ -63,6 +73,15 @@
         return NO;
     } else {
         return YES;
+    }
+}
+
+#pragma mark - AVCapturePhotoCaptureDelegate
+- (void)captureOutput:(AVCapturePhotoOutput *)output didFinishProcessingPhoto:(AVCapturePhoto *)photo error:(NSError *)error {
+    if (!error) {
+        NSData *data = [photo fileDataRepresentation];
+        NSLog(@"%@", data.description);
+        !_block ? : _block(data);
     }
 }
 
@@ -110,6 +129,11 @@
     if (!_previewLayer) {
         _previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.session];
         _previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+        AVCaptureVideoOrientation videoOrientation = AVCaptureVideoOrientationPortrait;
+        if (_type == OCRDeviceBack) {
+            videoOrientation = AVCaptureVideoOrientationLandscapeRight;
+        }
+        _previewLayer.connection.videoOrientation = videoOrientation;
     }
     return _previewLayer;
 }

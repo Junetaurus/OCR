@@ -16,6 +16,8 @@ typedef NS_ENUM(NSInteger, OCRDeviceType) {
     OCRDeviceBack,
 };
 
+typedef void(^photoBlock)(NSData *photoData);
+
 @interface OCRDevice : NSObject
 
 - (instancetype)initWithView:(UIView *)view deviceType:(OCRDeviceType)type;
@@ -23,6 +25,9 @@ typedef NS_ENUM(NSInteger, OCRDeviceType) {
 - (void)updateFrame;
 
 - (void)startRunning;
+- (void)stopRunning;
+
+- (void)getPhoto:(photoBlock)block;
 
 @end
 

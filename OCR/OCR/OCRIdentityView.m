@@ -13,6 +13,7 @@
 
 @property (nonatomic, strong) UIView *faceView;
 @property (nonatomic, strong) UIImageView *limitView;
+@property (nonatomic, strong) UIButton *photoBtn;
 @property (nonatomic, strong) OCRDevice *device;
 
 @end
@@ -27,6 +28,7 @@
         [self addSubview:self.faceView];
         [self.device startRunning];
         [self addSubview:self.limitView];
+        [self addSubview:self.photoBtn];
     }
     return self;
 }
@@ -40,6 +42,17 @@
     _faceView.frame = _limitView.frame;
     //
     [_device updateFrame];
+    //
+    [_photoBtn sizeToFit];
+    _photoBtn.centerY = _faceView.centerY;
+    _photoBtn.x = self.width - _photoBtn.width - 30;
+}
+
+#pragma mark - photoClick
+- (void)photoClick:(UIButton *)btn {
+    [_device getPhoto:^(NSData * _Nonnull photoData) {
+        
+    }];
 }
 
 #pragma mark - getter
@@ -55,6 +68,16 @@
         _limitView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ocr_id_frame"]];
     }
     return _limitView;
+}
+
+- (UIButton *)photoBtn {
+    if (!_photoBtn) {
+        _photoBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_photoBtn setImage:[UIImage imageNamed:@"ocr_id_photo"] forState:UIControlStateNormal];
+        [_photoBtn setImage:[UIImage imageNamed:@"ocr_id_photo"] forState:UIControlStateHighlighted];
+        [_photoBtn addTarget:self action:@selector(photoClick:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _photoBtn;
 }
 
 - (OCRDevice *)device {
