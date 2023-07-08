@@ -49,6 +49,7 @@
     
     _xBtn.width = DesignScaleWidth(21);
     _xBtn.height = DesignScaleHeight(21);
+    _xBtn.y = StatusBarHeight;
     _xBtn.x = self.width - DesignScaleWidth(20) - _xBtn.width;
     
     [_tipLabel sizeToFit];
@@ -65,7 +66,7 @@
     [_device updateFrame];
     
     _bgView.width = self.width;
-    _bgView.height = DesignScaleHeight(124);
+    _bgView.height = DesignScaleHeight(124) + BottomSafeAreaHeight;
     _bgView.y = self.height - _bgView.height;
     
     _aniLabel.height = _aniLabel.font.lineHeight;
