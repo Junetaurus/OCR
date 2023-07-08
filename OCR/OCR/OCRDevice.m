@@ -10,7 +10,6 @@
 #import "UIDevice+Direction.h"
 
 @interface OCRDevice () <AVCapturePhotoCaptureDelegate, AVCaptureVideoDataOutputSampleBufferDelegate>
-
 //设备
 @property (nonatomic, strong) AVCaptureDevice *device;
 //输入

@@ -8,20 +8,6 @@
 #ifndef General_h
 #define General_h
 
-//判断是否为iPhone X 系列
-#define IPHONE_X \
-({BOOL isPhoneX = NO;\
-if (@available(iOS 11.0, *)) {\
-isPhoneX = [[UIApplication sharedApplication] delegate].window.safeAreaInsets.bottom > 0.0;\
-}\
-(isPhoneX);})
-
-//iphoneX 安全高度
-#define BottomSafeAreaHeight (IPHONE_X ? 34.0f : 0.0f)
-
-//状态栏
-#define StatusBarHeight [[UIApplication sharedApplication]statusBarFrame].size.height
-
 //获取设备的物理高度
 #define ScreenHeight [UIScreen mainScreen].bounds.size.height
 

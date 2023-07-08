@@ -11,6 +11,7 @@
 #import "OCRIdentityView.h"
 #import "AppDelegate.h"
 #import "General.h"
+#import "UIView+Frame.h"
 
 @interface OCRViewController ()
 
@@ -48,8 +49,12 @@
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
-    _faceView.frame = self.view.bounds;
-    _idView.frame = self.view.bounds;
+    
+    CGRect layoutFrame = self.view.safeAreaLayoutGuide.layoutFrame;
+    UIEdgeInsets insets = self.view.safeAreaInsets;
+    
+    _faceView.frame = CGRectMake(insets.left, insets.top, layoutFrame.size.width, layoutFrame.size.width);
+    _idView.frame = CGRectMake(insets.left, 0, layoutFrame.size.width, self.view.height);
 }
 
 #pragma mark - getter

@@ -112,7 +112,8 @@
     
     _limitView.width = [self scaleWidth:414];
     _limitView.height = [self scaleHeight:260];
-    _limitView.center = self.center;
+    _limitView.centerX = self.width * 0.5;
+    _limitView.centerY = self.height * 0.5;
     
     _picView.frame = _limitView.frame;
     
@@ -148,8 +149,7 @@
 }
 
 - (CGFloat)scaleWidth:(CGFloat)width {
-    CGFloat designWidth = 640;
-    return roundf(self.width == designWidth ? (CGFloat)width : (CGFloat)self.width*((CGFloat)width/(CGFloat)designWidth));
+    return [self scaleHeight:width];
 }
 
 - (CGFloat)scaleHeight:(CGFloat)height {
