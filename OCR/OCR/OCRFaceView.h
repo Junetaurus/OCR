@@ -11,6 +11,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface OCRFaceView : UIView
 
+@property (nonatomic, copy) void(^faceCloseBlock)(NSData *__nullable photoData);
+
 @end
 
 NS_ASSUME_NONNULL_END

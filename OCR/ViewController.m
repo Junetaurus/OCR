@@ -6,15 +6,15 @@
 //
 
 #import "ViewController.h"
-#import "UIDevice+Direction.h"
-#import "OCRFaceView.h"
-#import "OCRIdentityView.h"
-#import "AppDelegate.h"
+#import "UIView+Frame.h"
+#import "General.h"
+#import "OCRViewController.h"
 
 @interface ViewController ()
 
-@property (nonatomic, strong) OCRFaceView *faceView;
-@property (nonatomic, strong) OCRIdentityView *idView;
+@property (nonatomic, strong) UIButton *faceBtn;
+@property (nonatomic, strong) UIButton *idBtn;
+@property (nonatomic, strong) UIImageView *imgView;
 
 @end
 
@@ -23,30 +23,74 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    [self ocrFace];
+    [self.view addSubview:self.faceBtn];
+    [self.view addSubview:self.idBtn];
+    [self.view addSubview:self.imgView];
+}
+
+- (void)viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
     //
-//    [self ocrId];
+    _faceBtn.y = 100;
+    _faceBtn.size = CGSizeMake(150, 50);
+    _faceBtn.centerX = self.view.width * 0.5;
+    //
+    _idBtn.size = _faceBtn.size;
+    _idBtn.centerX = _faceBtn.centerX;
+    _idBtn.y = _faceBtn.y + _faceBtn.height + 20;
+    //
+    _imgView.y = _idBtn.y + _idBtn.height + 20;
+    _imgView.size = CGSizeMake(self.view.width - 40, 400);
+    _imgView.centerX = _faceBtn.centerX;
 }
 
-- (void)viewDidLayoutSubviews {
-    [super viewDidLayoutSubviews];
-    _idView.frame = self.view.bounds;
+- (void)btnClick:(UIButton *)btn {
+    WeakSelf(self);
+    if (btn == _faceBtn) {
+        [OCRViewController ocrVCWithType:OCRFace currentVC:self].alertDismissBlock = ^(NSData * _Nullable photoData) {
+            weakself.imgView.image = [UIImage imageWithData:photoData];
+        };
+    }
+    if (btn == _idBtn) {
+        [OCRViewController ocrVCWithType:OCRId currentVC:self].alertDismissBlock = ^(NSData * _Nullable photoData) {
+            weakself.imgView.image = [UIImage imageWithData:photoData];
+        };
+    }
 }
 
-- (void)ocrFace {
-    _faceView = [[OCRFaceView alloc] initWithFrame:self.view.bounds];
-    [self.view addSubview:_faceView];
+#pragma mark - getter
+- (UIButton *)faceBtn {
+    if (!_faceBtn) {
+        _faceBtn = [UIButton buttonWithType:UIButtonTypeSystem];
+        [_faceBtn setTitle:@"Face" forState:UIControlStateNormal];
+        [_faceBtn setTitle:@"Face" forState:UIControlStateHighlighted];
+        [_faceBtn addTarget:self action:@selector(btnClick:) forControlEvents:UIControlEventTouchUpInside];
+        _faceBtn.layer.borderWidth = 1;
+        _faceBtn.layer.borderColor = BackGroundColorGreen.CGColor;
+    }
+    return _faceBtn;
 }
 
-- (void)ocrId {
-    [self appDelegate].allowRotation = YES;
-    [UIDevice switchNewOrientation:UIInterfaceOrientationLandscapeRight];
-    _idView = [[OCRIdentityView alloc] init];
-    [self.view addSubview:_idView];
+- (UIButton *)idBtn {
+    if (!_idBtn) {
+        _idBtn = [UIButton buttonWithType:UIButtonTypeSystem];
+        [_idBtn setTitle:@"ID" forState:UIControlStateNormal];
+        [_idBtn setTitle:@"ID" forState:UIControlStateHighlighted];
+        [_idBtn addTarget:self action:@selector(btnClick:) forControlEvents:UIControlEventTouchUpInside];
+        _idBtn.layer.borderWidth = 1;
+        _idBtn.layer.borderColor = BackGroundColorGreen.CGColor;
+    }
+    return _idBtn;
 }
 
-- (AppDelegate *)appDelegate {
-    return (AppDelegate *)(UIApplication.sharedApplication.delegate);
+- (UIImageView *)imgView {
+    if (!_imgView) {
+        _imgView = [[UIImageView alloc] init];
+        _imgView.contentMode = UIViewContentModeScaleAspectFit;
+        _imgView.layer.borderWidth = 1;
+        _imgView.layer.borderColor = BackGroundColorGreen.CGColor;
+    }
+    return _imgView;
 }
 
 @end

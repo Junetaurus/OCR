@@ -25,6 +25,7 @@ typedef void(^photoBlock)(NSData *photoData);
 - (void)updateFrame;
 
 - (void)startRunning;
+
 - (void)stopRunning;
 
 - (void)getPhoto:(photoBlock)block;

@@ -7,15 +7,20 @@
 
 #import "OCRDevice.h"
 #import <AVFoundation/AVFoundation.h>
+#import "UIDevice+Direction.h"
 
-@interface OCRDevice () <AVCapturePhotoCaptureDelegate>
+@interface OCRDevice () <AVCapturePhotoCaptureDelegate, AVCaptureVideoDataOutputSampleBufferDelegate>
 
 //设备
 @property (nonatomic, strong) AVCaptureDevice *device;
 //输入
 @property (nonatomic, strong) AVCaptureDeviceInput *input;
 //输出
-@property (nonatomic ,strong) AVCapturePhotoOutput *output;
+@property (nonatomic ,strong) AVCapturePhotoOutput *photoOutput;
+@property (nonatomic, strong) AVCaptureVideoDataOutput *dataOutput;
+@property (nonatomic, strong) NSMutableArray <NSData *> *dataArray;
+//connection
+@property (nonatomic, strong) AVCaptureConnection *connection;
 //session
 @property (nonatomic, strong) AVCaptureSession *session;
 //图像预览层
@@ -39,8 +44,14 @@
             if ([self.session canAddInput:self.input]) {
                 [self.session addInput:self.input];
             }
-            if ([self.session canAddOutput:self.output]) {
-                [self.session addOutput:self.output];
+            if (type == OCRDeviceFront) {
+                if ([self.session canAddOutput:self.dataOutput]) {
+                    [self.session addOutput:self.dataOutput];
+                }
+            } else if (type == OCRDeviceBack) {
+                if ([self.session canAddOutput:self.photoOutput]) {
+                    [self.session addOutput:self.photoOutput];
+                }
             }
             //
             [view.layer addSublayer:self.previewLayer];
@@ -62,11 +73,21 @@
 }
 
 - (void)getPhoto:(photoBlock)block {
-    AVCapturePhotoSettings *settings = [AVCapturePhotoSettings photoSettings];
-    [_output capturePhotoWithSettings:settings delegate:self];
+    _block = block;
+    if (_type == OCRDeviceBack) {
+        AVCapturePhotoSettings *settings = [AVCapturePhotoSettings photoSettings];
+        [_photoOutput capturePhotoWithSettings:settings delegate:self];
+    } else if (_type == OCRDeviceFront) {
+        if (self.dataArray.count) {
+            [self stopRunning];
+            !_block ? : _block(_dataArray[_dataArray.count / 2]);
+            return;
+        }
+        !_block ? : _block(_dataArray.firstObject);
+    }
 }
 
-#pragma mark - 权限
+#pragma mark - 相机权限
 - (BOOL)authorizationStatus {
     AVAuthorizationStatus authStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
     if (authStatus == AVAuthorizationStatusDenied) {
@@ -79,9 +100,73 @@
 #pragma mark - AVCapturePhotoCaptureDelegate
 - (void)captureOutput:(AVCapturePhotoOutput *)output didFinishProcessingPhoto:(AVCapturePhoto *)photo error:(NSError *)error {
     if (!error) {
+        [self stopRunning];
         NSData *data = [photo fileDataRepresentation];
-        NSLog(@"%@", data.description);
         !_block ? : _block(data);
+    }
+}
+
+#pragma mark - AVCaptureVideoDataOutputSampleBufferDelegate
+- (void)captureOutput:(AVCaptureOutput *)output didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
+    
+    [connection setVideoOrientation:AVCaptureVideoOrientationPortrait];
+    CVImageBufferRef buffer;
+    buffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+
+    CVPixelBufferLockBaseAddress(buffer, 0);
+    uint8_t *base;
+    size_t width, height, bytesPerRow;
+    base = (uint8_t *)CVPixelBufferGetBaseAddress(buffer);
+    width = CVPixelBufferGetWidth(buffer);
+    height = CVPixelBufferGetHeight(buffer);
+    bytesPerRow = CVPixelBufferGetBytesPerRow(buffer);
+
+    CGColorSpaceRef colorSpace;
+    CGContextRef cgContext;
+    colorSpace = CGColorSpaceCreateDeviceRGB();
+    cgContext = CGBitmapContextCreate(base, width, height, 8, bytesPerRow, colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
+    CGColorSpaceRelease(colorSpace);
+
+    CGImageRef cgImage;
+    UIImage *image;
+    cgImage = CGBitmapContextCreateImage(cgContext);
+    image = [UIImage imageWithCGImage:cgImage];
+    
+    [self detectFaceWithImage:image];
+    
+    CGImageRelease(cgImage);
+    CGContextRelease(cgContext);
+    CVPixelBufferUnlockBaseAddress(buffer, 0);
+}
+
+- (void)detectFaceWithImage:(UIImage *)image {
+    //图像识别能力：可以在CIDetectorAccuracyHigh(较强的处理能力)与CIDetectorAccuracyLow(较弱的处理能力)中选择，因为想让准确度高一些在这里选择CIDetectorAccuracyHigh
+    NSDictionary *opts = [NSDictionary dictionaryWithObject:
+                          CIDetectorAccuracyHigh forKey:CIDetectorAccuracy];
+    // 将图像转换为CIImage
+    CIImage *faceImage = [CIImage imageWithCGImage:image.CGImage];
+    CIDetector *faceDetector = [CIDetector detectorOfType:CIDetectorTypeFace context:nil options:opts];
+    // 识别出人脸数组
+    NSArray *features = [faceDetector featuresInImage:faceImage];
+    // 得到图片的尺寸
+    CGSize inputImageSize = [faceImage extent].size;
+    //将image沿y轴对称
+    CGAffineTransform transform = CGAffineTransformScale(CGAffineTransformIdentity, 1, -1);
+    //将图片上移
+    transform = CGAffineTransformTranslate(transform, 0, -inputImageSize.height);
+    //清空数组
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.dataArray removeAllObjects];
+    });
+    //取出人脸
+    CIFaceFeature *faceFeature = features.firstObject;
+    if (faceFeature && faceFeature.hasLeftEyePosition && faceFeature.hasRightEyePosition && faceFeature.hasMouthPosition) {
+        NSData *data = UIImagePNGRepresentation(image);
+        //
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSLog(@"检测到人脸");
+            [self.dataArray addObject:data];
+        });
     }
 }
 
@@ -110,11 +195,38 @@
     return _input;
 }
 
-- (AVCapturePhotoOutput *)output {
-    if (!_output) {
-        _output = [[AVCapturePhotoOutput alloc] init];
+- (AVCapturePhotoOutput *)photoOutput {
+    if (!_photoOutput) {
+        _photoOutput = [[AVCapturePhotoOutput alloc] init];
     }
-    return _output;
+    return _photoOutput;
+}
+
+- (AVCaptureVideoDataOutput *)dataOutput {
+    if (!_dataOutput) {
+        _dataOutput = [[AVCaptureVideoDataOutput alloc] init];
+        [_dataOutput setSampleBufferDelegate:self queue:dispatch_get_global_queue(0, 0)];
+        _dataOutput.videoSettings = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:kCVPixelFormatType_32BGRA], (id)kCVPixelBufferPixelFormatTypeKey, nil];
+        self.connection = [_dataOutput connectionWithMediaType:AVMediaTypeVideo];
+    }
+    return _dataOutput;
+}
+
+- (NSMutableArray<NSData *> *)dataArray {
+    if (!_dataArray) {
+        _dataArray = [NSMutableArray array];
+    }
+    return _dataArray;
+}
+
+- (AVCaptureConnection *)connection {
+    if (!_connection) {
+        _connection.videoScaleAndCropFactor = _connection.videoMaxScaleAndCropFactor;
+        if ([_connection isVideoStabilizationSupported]) {
+            _connection.preferredVideoStabilizationMode = AVCaptureVideoStabilizationModeAuto;
+        }
+    }
+    return _connection;
 }
 
 - (AVCaptureSession *)session {
@@ -139,4 +251,3 @@
 }
 
 @end
-

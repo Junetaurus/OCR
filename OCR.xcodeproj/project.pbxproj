@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BD11A9C62A57AACB007E2C9A /* OCRViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BD11A9C32A57AACB007E2C9A /* OCRViewController.m */; };
 		BDFC8C682A3412F200C5EF38 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BDFC8C672A3412F200C5EF38 /* AppDelegate.m */; };
 		BDFC8C6E2A3412F200C5EF38 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BDFC8C6D2A3412F200C5EF38 /* ViewController.m */; };
 		BDFC8C732A3412F300C5EF38 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BDFC8C722A3412F300C5EF38 /* Assets.xcassets */; };
@@ -20,6 +21,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		BD11A9C02A57A9DB007E2C9A /* General.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = General.h; sourceTree = "<group>"; };
+		BD11A9C32A57AACB007E2C9A /* OCRViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OCRViewController.m; sourceTree = "<group>"; };
+		BD11A9C42A57AACB007E2C9A /* OCRViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OCRViewController.h; sourceTree = "<group>"; };
 		BDFC8C632A3412F200C5EF38 /* OCR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OCR.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDFC8C662A3412F200C5EF38 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		BDFC8C672A3412F200C5EF38 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -81,6 +85,7 @@
 				BDFC8C742A3412F300C5EF38 /* LaunchScreen.storyboard */,
 				BDFC8C772A3412F300C5EF38 /* Info.plist */,
 				BDFC8C782A3412F300C5EF38 /* main.m */,
+				BD11A9C02A57A9DB007E2C9A /* General.h */,
 			);
 			path = OCR;
 			sourceTree = "<group>";
@@ -88,6 +93,8 @@
 		BDFC8C7F2A34130300C5EF38 /* OCR */ = {
 			isa = PBXGroup;
 			children = (
+				BD11A9C42A57AACB007E2C9A /* OCRViewController.h */,
+				BD11A9C32A57AACB007E2C9A /* OCRViewController.m */,
 				BDFC8C802A34139500C5EF38 /* OCRFaceView.h */,
 				BDFC8C812A34139500C5EF38 /* OCRFaceView.m */,
 				BDFC8C832A3413F100C5EF38 /* OCRIdentityView.h */,
@@ -186,6 +193,7 @@
 				BDFC8C682A3412F200C5EF38 /* AppDelegate.m in Sources */,
 				BDFC8C792A3412F300C5EF38 /* main.m in Sources */,
 				BDFC8C822A34139500C5EF38 /* OCRFaceView.m in Sources */,
+				BD11A9C62A57AACB007E2C9A /* OCRViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -336,7 +344,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = june.OCR;
+				PRODUCT_BUNDLE_IDENTIFIER = com.june.ocr;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -366,7 +374,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = june.OCR;
+				PRODUCT_BUNDLE_IDENTIFIER = com.june.ocr;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
